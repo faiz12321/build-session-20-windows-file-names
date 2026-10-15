@@ -1,0 +1,26 @@
+name: test
+on: [push, workflow_dispatch]
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m unittest -v
+      - run: python make_sample.py
+      - name: Reports on the sample files
+        shell: python
+        run: |
+          import subprocess, sys
+          def run(*args):
+              return subprocess.run([sys.executable, "namecheck.py", *args], capture_output=True, text=True)
+          names = run("names", "sample/names.txt")
+          assert names.returncode == 1 and "Names with a problem: 7" in names.stdout and "'NUL.txt'" in names.stdout, names.stdout
+          folder = run("folder", "sample/tree")
+          assert folder.returncode == 0 and "Names checked: 4" in folder.stdout, folder.stdout
+          print("Sample name reports checked.")
