@@ -1,0 +1,102 @@
+### CMD: python --version
+Python 3.12.10
+### EXIT: 0
+
+### CMD: python make_sample.py
+Made sample/names.txt and sample/tree with three small files
+### EXIT: 0
+
+### CMD: python make_sample.py
+Stopped: sample already exists. Nothing was replaced or deleted.
+### EXIT: 1
+
+### CMD: python -c "print(open('sample/names.txt').read())"
+holiday photos.jpg
+report: final.docx
+notes?.txt
+NUL.txt
+budget 2026.xlsx
+draft.
+com1
+my<file>.txt
+.gitignore
+lpt¹.log
+
+### EXIT: 0
+
+### CMD: python namecheck.py names sample/names.txt
+Bad character: report: final.docx
+Bad character: notes?.txt
+Bad character: my<file>.txt
+### EXIT: 0
+
+### CMD: python namecheck.py names sample/names.txt
+Names checked: 10
+Names with a problem: 7
+  'report: final.docx': contains :
+  'notes?.txt': contains ?
+  'NUL.txt': starts with a reserved device name
+  'draft.': ends with a space or a period
+  'com1': starts with a reserved device name
+  'my<file>.txt': contains < >
+  'lpt\xb9.log': starts with a reserved device name
+Nothing was renamed or changed.
+### EXIT: 1
+
+### CMD: python namecheck.py folder sample/tree
+Names checked: 4
+No problems found against the rules this tool knows.
+That does not mean every program or file system will accept them.
+### EXIT: 0
+
+### CMD: python -m unittest -v
+test_folder_root_link_refused (test_namecheck.FilesystemSafety.test_folder_root_link_refused) ... ok
+test_list_hardlink_refused (test_namecheck.FilesystemSafety.test_list_hardlink_refused) ... ok
+test_list_linked_parent_refused (test_namecheck.FilesystemSafety.test_list_linked_parent_refused) ... ok
+test_list_symlink_existing_dangling_and_selfloop_refused (test_namecheck.FilesystemSafety.test_list_symlink_existing_dangling_and_selfloop_refused) ... ok
+test_scandir_permission_error_is_not_a_clean_report (test_namecheck.FilesystemSafety.test_scandir_permission_error_is_not_a_clean_report) ... ok
+test_setup_linked_parent_refused (test_namecheck.FilesystemSafety.test_setup_linked_parent_refused) ... ok
+test_setup_traversal_refused (test_namecheck.FilesystemSafety.test_setup_traversal_refused) ... ok
+test_traversal_refused (test_namecheck.FilesystemSafety.test_traversal_refused) ... ok
+test_tree_file_link_refused (test_namecheck.FilesystemSafety.test_tree_file_link_refused) ... ok
+test_tree_hardlink_refused (test_namecheck.FilesystemSafety.test_tree_hardlink_refused) ... ok
+test_tree_recursive_loop_refused (test_namecheck.FilesystemSafety.test_tree_recursive_loop_refused) ... ok
+test_tree_special_pipe_refused (test_namecheck.FilesystemSafety.test_tree_special_pipe_refused) ... skipped 'Unix pipe unavailable'
+test_flags_names_found_in_a_folder (test_namecheck.Folder.test_flags_names_found_in_a_folder) ... ok
+test_long_path_flagged (test_namecheck.Folder.test_long_path_flagged) ... ok
+test_not_a_folder (test_namecheck.Folder.test_not_a_folder) ... ok
+test_sample_folder_is_clean (test_namecheck.Folder.test_sample_folder_is_clean) ... ok
+test_usage (test_namecheck.Folder.test_usage) ... ok
+test_blank_lines_skipped (test_namecheck.Names.test_blank_lines_skipped) ... ok
+test_clean_list (test_namecheck.Names.test_clean_list) ... ok
+test_missing_list (test_namecheck.Names.test_missing_list) ... ok
+test_not_utf8 (test_namecheck.Names.test_not_utf8) ... ok
+test_only_first_20_shown (test_namecheck.Names.test_only_first_20_shown) ... ok
+test_sample_list (test_namecheck.Names.test_sample_list) ... ok
+test_windows_line_endings_in_list (test_namecheck.Names.test_windows_line_endings_in_list) ... ok
+test_no_file_with_a_bad_name_is_created (test_namecheck.ReadOnly.test_no_file_with_a_bad_name_is_created) ... ok
+test_nothing_changed_or_created (test_namecheck.ReadOnly.test_nothing_changed_or_created) ... ok
+test_com0_and_com10_not_listed (test_namecheck.Rules.test_com0_and_com10_not_listed) ... ok
+test_control_character (test_namecheck.Rules.test_control_character) ... ok
+test_device_name_only_at_the_start (test_namecheck.Rules.test_device_name_only_at_the_start) ... ok
+test_device_name_with_extension (test_namecheck.Rules.test_device_name_with_extension) ... ok
+test_device_names_any_case (test_namecheck.Rules.test_device_names_any_case) ... ok
+test_dot_and_dotdot_alone (test_namecheck.Rules.test_dot_and_dotdot_alone) ... ok
+test_each_reserved_character (test_namecheck.Rules.test_each_reserved_character) ... ok
+test_leading_period_is_fine (test_namecheck.Rules.test_leading_period_is_fine) ... ok
+test_plain_name (test_namecheck.Rules.test_plain_name) ... ok
+test_reserved_characters_listed_once (test_namecheck.Rules.test_reserved_characters_listed_once) ... ok
+test_several_reasons_at_once (test_namecheck.Rules.test_several_reasons_at_once) ... ok
+test_superscript_digits (test_namecheck.Rules.test_superscript_digits) ... ok
+test_tab_is_a_control_character (test_namecheck.Rules.test_tab_is_a_control_character) ... ok
+test_trailing_period_and_space (test_namecheck.Rules.test_trailing_period_and_space) ... ok
+test_cli_repeat_preserves_every_output (test_namecheck.SafeSetup.test_cli_repeat_preserves_every_output) ... ok
+test_existing_file_preserved (test_namecheck.SafeSetup.test_existing_file_preserved) ... ok
+test_existing_folder_preserves_nested_bytes_and_mtime (test_namecheck.SafeSetup.test_existing_folder_preserves_nested_bytes_and_mtime) ... ok
+test_repeat_preserves_every_output (test_namecheck.SafeSetup.test_repeat_preserves_every_output) ... ok
+
+----------------------------------------------------------------------
+Ran 44 tests in 0.168s
+
+OK (skipped=1)
+### EXIT: 0
