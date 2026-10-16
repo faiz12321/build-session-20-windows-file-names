@@ -6,6 +6,8 @@ Exit code: 0 = no problem found, 1 = problem found, 2 = could not read.
 """
 import os
 import sys
+import stat
+from pathlib import Path
 
 BAD_CHARS = '<>:"/\\|?*'
 RESERVED = {"CON", "PRN", "AUX", "NUL"}
@@ -30,24 +32,55 @@ def check_name(name):
     return reasons
 
 
+def safe_input(value, directory=False):
+    path = Path(value).absolute()
+    if '..' in path.parts:
+        raise OSError('Parent-traversal paths are unsupported.')
+    for part in [*reversed(path.parents), path]:
+        info = part.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info,'st_file_attributes',0) & 0x400:
+            raise OSError('Links/reparse points are unsupported.')
+    info = path.lstat()
+    if directory:
+        if not stat.S_ISDIR(info.st_mode):
+            raise OSError('Expected an ordinary directory.')
+    elif not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+        raise OSError('Expected an ordinary singly linked file.')
+    return path
+
+
 def read_names(path):
+    path = safe_input(path)
     with open(path, encoding="utf-8-sig") as f:
         text = f.read()
     return [line for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n") if line != ""]
 
 
 def scan_folder(folder):
+    folder = safe_input(folder, directory=True)
     problems = []
     count = 0
-    for dirpath, dirnames, filenames in os.walk(folder):
-        for name in dirnames + filenames:
-            count += 1
-            reasons = check_name(name)
-            full = os.path.abspath(os.path.join(dirpath, name))
-            if len(full) >= PATH_LIMIT:
-                reasons.append(f"whole path is {len(full)} characters")
-            if reasons:
-                problems.append((os.path.relpath(os.path.join(dirpath, name), folder), reasons))
+    stack = [folder]
+    while stack:
+        current = stack.pop()
+        # scandir errors propagate: an unreadable tree is not a clean report.
+        with os.scandir(current) as entries:
+            for entry in entries:
+                info = entry.stat(follow_symlinks=False)
+                directory = stat.S_ISDIR(info.st_mode)
+                safe_input(entry.path, directory=directory)
+                count += 1
+                if count > 10000:
+                    raise OSError('Tree exceeds 10000 entries.')
+                name = entry.name
+                reasons = check_name(name)
+                full = os.path.abspath(entry.path)
+                if len(full) >= PATH_LIMIT:
+                    reasons.append(f"whole path is {len(full)} characters")
+                if reasons:
+                    problems.append((os.path.relpath(entry.path, folder), reasons))
+                if directory:
+                    stack.append(Path(entry.path))
     return count, problems
 
 
@@ -76,7 +109,7 @@ def main(argv):
             names = read_names(argv[2])
             problems = [(n, check_name(n)) for n in names if check_name(n)]
             return report(len(names), problems)
-        if not os.path.isdir(argv[2]):
+        if not Path(argv[2]).exists():
             print("Not a folder:", argv[2])
             return 2
         count, problems = scan_folder(argv[2])
